@@ -23,7 +23,10 @@
         $email = $data['email'];
         $password = $data['password'];
 
-        $result = $conn->query("SELECT * FROM users WHERE email='$email'");
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email= ?");
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $user = $result->fetch_assoc();
 
         if ($user && password_verify($password, $user['password'])) {
