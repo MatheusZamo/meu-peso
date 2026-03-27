@@ -8,12 +8,13 @@
         $email = $data['email'];
         $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
-        $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$password')";
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $name, $email, $password);
 
-        if ($conn->query($sql)) {
+        if ($stmt->execute()) {
             echo json_encode(["message" => "Criado"]);
         } else {
-            echo json_encode(["error" => "Erro"]);
+            echo json_encode(["error" => "Erro ao cadastrar"]);
         }
     }
 
@@ -30,7 +31,11 @@
         $user = $result->fetch_assoc();
 
         if ($user && password_verify($password, $user['password'])) {
-            echo json_encode(["id" => $user['id']]);
+            echo json_encode([
+                "id" => $user['id'],
+                "name" => $user['name'],
+                "email" => $user['email']
+            ]);
         } else {
             http_response_code(401);
             echo json_encode(["error" => "Inválido"]);
